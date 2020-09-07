@@ -156,10 +156,10 @@
         android:textSize="24sp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/button" />
+        app:layout_constraintTop_toTopOf="@+id/filter_button" />
 
     <Button
-        android:id="@+id/button"
+        android:id="@+id/filter_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
@@ -181,7 +181,15 @@
         android:dividerHeight="0.5dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/button"
+        app:layout_constraintTop_toBottomOf="@+id/filter_button"
         tools:listitem="@layout/list_group" />
+
+    <Button
+        android:id="@+id/call_pokemon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Call Api"
+        app:layout_constraintStart_toEndOf="@+id/filter_button"
+        app:layout_constraintTop_toTopOf="@+id/filter_button" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
