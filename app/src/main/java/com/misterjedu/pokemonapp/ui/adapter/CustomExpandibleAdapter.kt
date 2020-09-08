@@ -1,4 +1,4 @@
-package com.misterjedu.pokemonapp
+package com.misterjedu.pokemonapp.ui.adapter
 
 import android.content.Context
 import android.view.LayoutInflater
@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import android.widget.BaseExpandableListAdapter
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.misterjedu.pokemonapp.R
 
 class CustomExpandibleAdapter(
     var context : Context,
@@ -63,7 +64,7 @@ class CustomExpandibleAdapter(
             convertView = layoutInflater.inflate(R.layout.list_child, null)
         }
 
-        val textView: TextView? = convertView?.findViewById(R.id.list_child )
+        val textView: TextView? = convertView?.findViewById(R.id.list_child)
         textView?.text = child as CharSequence?
         return  convertView
     }
