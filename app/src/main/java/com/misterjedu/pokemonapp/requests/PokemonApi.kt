@@ -27,8 +27,4 @@ interface PokemonApi {
         @Url url: String?
     ): Call<ResponseBody?>?
 
-    // @Url url : String
-// @Query("id") id :String,
-//  @Path("id") id : String
-
 }

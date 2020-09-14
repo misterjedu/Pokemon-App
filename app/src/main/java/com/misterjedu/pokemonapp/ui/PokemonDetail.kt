@@ -6,9 +6,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ExpandableListView
-import android.widget.ImageView
-import android.widget.TextView
+import android.widget.*
 import com.misterjedu.pokemonapp.R
 import com.misterjedu.pokemonapp.models.*
 import com.misterjedu.pokemonapp.requests.PokemonApi
@@ -38,7 +36,9 @@ class PokemonDetail : Fragment() {
     private lateinit var pokemonHeight: TextView
     private lateinit var pokemonWeight: TextView
     private lateinit var pokemonImage: ImageView
-    private lateinit var pokemonDetailstext : TextView
+    private lateinit var pokemonDetailstext: TextView
+    private var isFragmentVisible = true
+    private lateinit var refreshButton: Button
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -49,6 +49,8 @@ class PokemonDetail : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        isFragmentVisible = true
+
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_pokemon_detail, container, false)
     }
@@ -70,6 +72,14 @@ class PokemonDetail : Fragment() {
             pokemonId = url[url.size - 2]
         }
 
+
+        //Get refresh Button
+        refreshButton = fragment_detail_button
+        refreshButton.setOnClickListener {
+            requestPokemonRetrofit()
+        }
+
+
         //Get all Pokemon detail views
         pokemonName = pokemon_name_value
         pokemonOrder = pokemon_order_value
@@ -85,9 +95,34 @@ class PokemonDetail : Fragment() {
         //Set Custom Expandable Adapter
         adapter = CustomExpandibleAdapter(requireContext(), listGroup, listItem)
         expandableListView.setAdapter(adapter)
-
-        //Make an Api request to get the details of the pokemon
         requestPokemonRetrofit()
+
+    }
+
+    //If there's no network connection, show the offline page and hide the online page
+    private fun loadOffline() {
+        pokemon_detail_online_page.visibility = View.GONE
+        pokemon_detail_offline_page.visibility = View.VISIBLE
+        fragment_detail_loading_page.visibility = View.GONE
+    }
+
+    //If there's no network connection, show the offline page and hide the online page
+    private fun loadOnline() {
+        pokemon_detail_online_page.visibility = View.VISIBLE
+        pokemon_detail_offline_page.visibility = View.GONE
+        fragment_detail_loading_page.visibility = View.GONE
+    }
+
+    private fun loadLoading() {
+        pokemon_detail_online_page.visibility = View.GONE
+        pokemon_detail_offline_page.visibility = View.GONE
+        fragment_detail_loading_page.visibility = View.VISIBLE
+    }
+
+    //override Onstop Lifecylce to set fragment visibility to false
+    override fun onStop() {
+        super.onStop()
+        isFragmentVisible = false
     }
 
     private fun initListData(
@@ -114,106 +149,6 @@ class PokemonDetail : Fragment() {
     }
 
 
-    private fun requestPokemonRetrofit() {
-        val pokemonApi: PokemonApi = ServiceGenerator.getPokemonApi()
-
-        val call: Call<PokemanResponse> = pokemonApi.getIndividualPokemon(pokemonId)
-
-        call.enqueue(object : Callback<PokemanResponse> {
-            override fun onResponse(
-                call: Call<PokemanResponse>,
-                response: Response<PokemanResponse>
-            ) {
-                if (response.code() == 200) {
-                    /**
-                     * Get all single values from the Response Object and set the views
-                     */
-                    pokemonName.text = response.body()?.getName()?.capitalize(Locale.ROOT)
-                    pokemonOrder.text = response.body()?.getOrder().toString()
-                    pokemonHeight.text = response.body()?.getHeight().toString()
-                    pokemonWeight.text = response.body()?.getWeight().toString()
-                    pokemonDetailstext.text = "${
-                        response.body()?.getName()?.capitalize(Locale.ROOT)} " +
-                            getString(R.string.details)
-                    Picasso.get()
-                        .load("https://pokeres.bastionbot.org/images/pokemon/${pokemonId}.png")
-                        .into(pokemonImage)
-
-                    /**
-                     * Get Arrays of Objects select details
-                     */
-                    val abilities: ArrayList<Abilities>? = response.body()?.getAbilities()
-                    val moves: ArrayList<Moves>? = response.body()?.getMoves()
-                    val stats: ArrayList<Stats>? = response.body()?.getStats()
-                    val types: ArrayList<Types>? = response.body()?.getTypes()
-
-                    /**
-                     *  Extract the string values of the objects
-                     */
-                    //Extract Abilities string
-                    val abilitiesList = mutableListOf<String>()
-                    if (abilities != null) {
-                        for( index in abilities){
-                            abilitiesList.add(index.ability.name)
-                        }
-                    }
-
-                    //Extract Moves String
-                    val movesList = mutableListOf<String>()
-                    if (moves != null) {
-                       for ((index, move) in moves.withIndex()) {
-                           movesList.add(move.move.name)
-                           if(index >= 10){
-                               break
-                           }
-                        }
-                    }
-
-                    //Extract Stats String
-                    val statsList = mutableListOf<String>()
-                    if (stats != null) {
-                        for( index in stats){
-                            statsList.add("${index.stat.name} -> " +
-                                    "${index.base_stat} ")
-                        }
-                    }
 
 
-                    //Extract Types String
-                    val typesList = mutableListOf<String>()
-                    if (types != null) {
-                        for( index in types){
-                            typesList.add(index.type.name)
-                        }
-                    }
-
-                    val pokemonTitles = mutableListOf("Abilities", "Moves", "Stats", "Types")
-
-                    val pokemonDetails = mutableListOf(
-                        abilitiesList, movesList,statsList,typesList
-                    )
-
-
-                    /**
-                     *  After extracting all the titles and details
-                     *  pass them into the the init function for the
-                     *  expandable adapter's consumption.
-                     */
-                    initListData(pokemonTitles, pokemonDetails)
-
-                } else {
-                    try {
-                        Log.i("Server Response Body", response.errorBody().toString())
-                    } catch (e: IOException) {
-                        e.printStackTrace()
-                    }
-                }
-            }
-
-            override fun onFailure(call: Call<PokemanResponse>, t: Throwable) {
-                Log.i("Server Response", t.message!!)
-            }
-
-        })
-    }
 }

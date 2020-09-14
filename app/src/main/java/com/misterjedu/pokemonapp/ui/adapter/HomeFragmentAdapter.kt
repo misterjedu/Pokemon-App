@@ -13,9 +13,10 @@ import kotlinx.android.synthetic.main.single_pokemon.view.*
 import java.util.*
 import kotlin.collections.ArrayList
 
-class HomeFragmentAdapter(private var clickListener: OnResultClickListener,
-                          private var results: ArrayList<Results>?):
+class HomeFragmentAdapter(private var clickListener: OnResultClickListener, ):
     RecyclerView.Adapter<HomeFragmentAdapter.HomeFragmentViewHolder>() {
+
+    private var results = mutableListOf<Results>()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): HomeFragmentViewHolder {
         val pokemanListView = LayoutInflater.from(parent.context)
@@ -25,10 +26,10 @@ class HomeFragmentAdapter(private var clickListener: OnResultClickListener,
 
     override fun onBindViewHolder(holder: HomeFragmentViewHolder, position: Int) {
 
-        holder.initialize(results!![position], clickListener)
+        holder.initialize(results[position], clickListener)
 
         //Get the Id from the result url
-        val currentPokeman = results!![position]
+        val currentPokeman = results[position]
         val url = currentPokeman.url.split("/")
         val id = url[url.size-2]
 
@@ -40,7 +41,7 @@ class HomeFragmentAdapter(private var clickListener: OnResultClickListener,
             .into(holder.pokemonImage)
     }
 
-    override fun getItemCount() = results!!.size
+    override fun getItemCount() = results.size
 
     //View Holder Class
     class HomeFragmentViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView){
@@ -53,6 +54,11 @@ class HomeFragmentAdapter(private var clickListener: OnResultClickListener,
                 action.onItemClick(item,adapterPosition)
             }
         }
+    }
+
+    fun setResult(pokemons : List<Results>){
+        this.results = pokemons as MutableList<Results>
+        notifyDataSetChanged()
     }
 
     //OnClick Listener InterfaceR
