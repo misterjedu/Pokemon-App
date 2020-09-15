@@ -43,10 +43,11 @@ class HomeFragment : Fragment(), HomeFragmentAdapter.OnResultClickListener {
 
         //If the fragment is in view, set fragment visibility to true
         isFragmentVisible = true
+        //Instantiate the View Model Class
+
+        viewModel = ViewModelProvider(this).get(PokemonViewModel::class.java)
 
         // Inflate the layout for this fragment
-        viewModel = ViewModelProvider(this).get(PokemonViewModel::class.java)
-        //Instantiate the View Model Class
         return inflater.inflate(R.layout.fragment_home, container, false)
     }
 
@@ -69,7 +70,7 @@ class HomeFragment : Fragment(), HomeFragmentAdapter.OnResultClickListener {
                     viewModel.getApiResult()
                 } else {
                     pageLoader.loadOffline(onLinePage, offLine, loading)
-                    offline_page.visibility = View.VISIBLE
+
                 }
             }
         })
@@ -116,9 +117,10 @@ class HomeFragment : Fragment(), HomeFragmentAdapter.OnResultClickListener {
     }
 
 
-    override fun onDestroy() {
-        super.onDestroy()
-        //If the fragment is in view, set fragment visibility to false
+    //override OnStop LifeCylce,  the fragment is not in view. Set fragment visibility to false
+    //If, set fragment visibility to false
+    override fun onStop() {
+        super.onStop()
         isFragmentVisible = false
     }
 }

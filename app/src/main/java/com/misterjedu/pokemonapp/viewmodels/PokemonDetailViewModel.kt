@@ -52,8 +52,14 @@ class PokemonDetailViewModel : ViewModel() {
     val listItem: LiveData<MutableMap<String, MutableList<String>>>
         get() = _listItem
 
-    private fun requestPokemonRetrofit(id: String) {
+    //Connectivity Status
+    private val _connectivity = MutableLiveData<String>()
+    val connectivity: LiveData<String>
+        get() = _connectivity
 
+
+  fun requestPokemonRetrofit(id: String) {
+      _connectivity.value = "Connecting"
         //Get the Service Generator Interface
         val pokemonApi: PokemonApi = ServiceGenerator.getPokemonApi()
 
@@ -66,6 +72,8 @@ class PokemonDetailViewModel : ViewModel() {
                 response: Response<PokemanResponse>
             ) {
                 if (response.code() == 200) {
+                    _connectivity.value = "Connected"
+
                     /**
                      * Get all single values from the Response Object and set the views
                      */
@@ -77,9 +85,6 @@ class PokemonDetailViewModel : ViewModel() {
                         response.body()?.getName()?.capitalize(Locale.ROOT)
                     } " + "Details"
 
-                    Picasso.get()
-                        .load("https://pokeres.bastionbot.org/images/pokemon/${id}.png")
-                        .into(pokemonImage)
 
                     /**
                      * Get Arrays of Objects select details
@@ -148,7 +153,7 @@ class PokemonDetailViewModel : ViewModel() {
                 } else {
                     try {
                         Log.i("Server Response Body", response.errorBody().toString())
-                        loadOffline()
+//                        loadOffline()
                     } catch (e: IOException) {
                         e.printStackTrace()
                     }
@@ -156,8 +161,8 @@ class PokemonDetailViewModel : ViewModel() {
             }
 
             override fun onFailure(call: Call<PokemanResponse>, t: Throwable) {
-                Log.i("Server Response Detail", t.message!!)
-                loadOffline()
+
+                 _connectivity.value = "Not Connected"
             }
         })
 
@@ -165,24 +170,21 @@ class PokemonDetailViewModel : ViewModel() {
     }
 
     private fun initListData(pokemonTitles: MutableList<String>, pokemonDetails: MutableList<MutableList<String>>) {
-
         //Set List Group title
-        for (title in pokemonTitles) {
-            _listGroup.value?.add(title)
-        }
+        _listGroup.value = pokemonTitles
 
-        //Set List children (items)
-        val list1 = pokemonDetails[0]
-        val list2 = pokemonDetails[1]
-        val list3 = pokemonDetails[2]
-        val list4 = pokemonDetails[3]
+        val newlistGroup = mutableMapOf<String, MutableList<String>>()
 
+        newlistGroup[pokemonTitles[0]] = pokemonDetails[0]
+        newlistGroup[pokemonTitles[1]] = pokemonDetails[1]
+        newlistGroup[pokemonTitles[2]] = pokemonDetails[2]
+        newlistGroup[pokemonTitles[3]] = pokemonDetails[3]
 
-        //Set the List Item
-        _listItem.value?.set(_listGroup.value?.get(0), list1)
-        listItem[listGroup[1]] = list2
-        listItem[listGroup[2]] = list3
-        listItem[listGroup[3]] = list4
+        //Set Group Items
+        _listItem.value = newlistGroup
+
     }
 
+
 }
+
